@@ -2,47 +2,47 @@ version: "3.8"
 services:
   # Spring Boot backend service (MySQL connected)
   spring-app:
-    image: keeleybootcamp/spring-app  # Replace with your actual image name or build context
+    image: keeleybootcamp/spring-app  
     build:
-      context: ./  # Path to the Spring Boot app directory
+      context: ./  
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/mydb  # Configure MySQL URL
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/mydb  
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysecretpassword
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # Configure JPA
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update  
     ports:
-      - "8000:8000"  # Exposing the backend on port 8080
+      - "8000:8000"  
     depends_on:
       - mysql-db
     networks:
       - app-network
 
-  # React frontend service (First frontend)
+  # React frontend service
   react-app:
-    image: keeleybootcamp/react-app  # Replace with your actual image or build context
+    image: keeleybootcamp/react-app  
     build:
-      context: ./  # Path to the first React app
+      context: ./
     ports:
-      - "80:80"  # Exposing React frontend on port 3000 (or adjust as needed)
+      - "80:80" 
     networks:
       - app-network
 
 
   # MySQL database service
   mysql-db:
-    image: mysql:5.7  # Use MySQL 5.7 or another version as needed
+    image: mysql:5.7 
     environment:
-      MYSQL_ROOT_PASSWORD: mysecretpassword  # Set MySQL root password
-      MYSQL_DATABASE: mydb  # Database name to be created
+      MYSQL_ROOT_PASSWORD: mysecretpassword  
+      MYSQL_DATABASE: mydb  
     volumes:
-      - mysql-data:/var/lib/mysql  # Volume to persist data
+      - mysql-data:/var/lib/mysql  
     ports:
-      - "3306:3306"  # Exposing MySQL on port 3306
+      - "3306:3306"  
     networks:
       - app-network
 
 volumes:
-  mysql-data:  # Define the volume to persist MySQL data
+  mysql-data:  # add volume details
 
 networks:
   app-network:

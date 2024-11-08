@@ -6,12 +6,14 @@ pipeline {
         SPRING_REPO = 'https://github.com/keeley-bootcamp/lbg-car-spring-app-starter.git'
         REACT_DIR = 'react'
         SPRING_DIR = 'spring'
-        MAVEN_HOME = tool "M3"
+        MAVEN_HOME = tool 'M3'
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub_id'  // Jenkins credentials ID for Docker Hub
         DOCKERHUB_USERNAME = credentials('dockerhub_id') // Use credentials in Jenkins
         SSH_CREDENTIALS_ID = 'deploy-ssh-key'  // Jenkins SSH credentials ID for remote server
         REMOTE_SERVER = '35.210.185.254'  // The IP or hostname of the remote server
         REMOTE_PATH = '/home/gradc1_delegate9/group-3-pipeline'  // The directory on the remote server containing your docker-compose.yml
+        MYSQL_ROOT_PASSWORD = 'secretsecret'
+        SERVER_URL = '35.210.185.254'
     }
 
     stages {
@@ -24,8 +26,20 @@ pipeline {
             }
         }
 
-        // Stage 2: Install React dependencies
-        stage('Install React Dependencies') {
+        stage('Test and build react frontend') {
+            steps {
+                dir("${REACT_DIR}") {
+                    sh """
+                    npm install
+                    yarn test
+                    docker build --build-arg SERVER_URL=${SERVER_URL} -t keeleybootcamp/react-app:v${BUILD_NUMBER} .
+                    docker tag keeleybootcamp/react-app:v${BUILD_NUMBER} keeleybootcamp/react-app:latest
+                    """
+                }
+            }
+        }
+
+        /*stage('Install React Dependencies') {
             steps {
                 dir("${REACT_DIR}") {
                     sh "npm install"
@@ -33,7 +47,6 @@ pipeline {
             }
         }
 
-        // Stage 3: Test React
         stage('Test React') {
             steps {
                 dir("${REACT_DIR}") {
@@ -42,14 +55,13 @@ pipeline {
             }
         }
 
-        // Stage 4: Build React (production build)
         stage('Package React') {
             steps {
                 dir("${REACT_DIR}") {
                     sh "npm run build"
                 }
             }
-        }
+        }*/
 
         // Stage 5: Checkout Spring Boot repository
         stage('Checkout Spring') {
@@ -60,8 +72,24 @@ pipeline {
             }
         }
 
-        // Stage 6: Compile Spring Boot app
-        stage('Compile Spring') {
+        stage('Test and build spring backend') {
+            steps {
+                dir("lbg-car-back") {
+                    sh "mvn clean test"
+                    sh '''
+                    cat - > src/main/resources/application.properties <<EOF
+                    spring.profiles.active=prod
+                    logging.level.root=DEBUG
+                    server.port=8000
+                    spring.jpa.show-sql=true
+                    '''
+                    sh "docker build -t keeleybootcamp/spring-app:v${BUILD_NUMBER} --build-arg MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} ."
+                    sh "docker tag keeleybootcamp/spring-app:v${BUILD_NUMBER} keeleybootcamp/spring-app:latest"
+                }
+            }
+        }
+
+        /*stage('Compile Spring') {
             steps {
                 dir("${SPRING_DIR}") {
                     sh "mvn clean compile"
@@ -69,7 +97,6 @@ pipeline {
             }
         }
 
-        // Stage 7: Test Spring Boot app
         stage('Test Spring') {
             steps {
                 dir("${SPRING_DIR}") {
@@ -78,41 +105,13 @@ pipeline {
             }
         }
 
-        // Stage 8: Package Spring Boot app
         stage('Package Spring') {
             steps {
                 dir("${SPRING_DIR}") {
                     sh "mvn -Dmaven.test.skip -Dmaven.compile.skip package"
                 }
             }
-        }
-
-        // Stage 9: Build Docker images for both React and Spring Boot apps
-        stage('Build Docker Images') {
-            parallel {
-                stage('Build Docker Image for React') {
-                    steps {
-                        dir("${REACT_DIR}") {
-                            script {
-                                echo "Building Docker image for React..."
-                                sh 'docker build -t keeleybootcamp/react-app .'
-                            }
-                        }
-                    }
-                }
-
-                stage('Build Docker Image for Spring Boot') {
-                    steps {
-                        dir("${SPRING_DIR}") {
-                            script {
-                                echo "Building Docker image for Spring Boot..."
-                                sh 'docker build -t keeleybootcamp/spring-app .'
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        }*/
 
         // Stage 10: Push Docker images to Docker Hub
         stage('Push Docker Images to Docker Hub') {
@@ -162,12 +161,4 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            echo 'Both React and Spring Boot applications have been successfully deployed to Docker Hub and containers are up and running on the remote server.'
-        }
-        failure {
-            echo 'There was an error during the build or deployment process.'
-        }
-    }
 }
