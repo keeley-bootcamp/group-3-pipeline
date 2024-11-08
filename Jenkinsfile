@@ -11,7 +11,7 @@ pipeline {
         DOCKERHUB_USERNAME = credentials('dockerhub_id') // Use credentials in Jenkins
         SSH_CREDENTIALS_ID = 'deploy-ssh-key'  // Jenkins SSH credentials ID for remote server
         REMOTE_SERVER = '35.210.185.254'  // The IP or hostname of the remote server
-        REMOTE_PATH = '/path/to/your/docker/project'  // The directory on the remote server containing your docker-compose.yml
+        REMOTE_PATH = '/home/gradc1_delegate9/group-3-pipeline'  // The directory on the remote server containing your docker-compose.yml
     }
 
     stages {

@@ -2,40 +2,31 @@ version: "3.8"
 services:
   # Spring Boot backend service (MySQL connected)
   spring-app:
-    image: keeleybootcamp/lbg-car-spring-app-starter  # Replace with your actual image name or build context
+    image: keeleybootcamp/spring-app  # Replace with your actual image name or build context
     build:
-      context: ./spring  # Path to the Spring Boot app directory
+      context: ./  # Path to the Spring Boot app directory
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/mydb  # Configure MySQL URL
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=mysecretpassword
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update  # Configure JPA
     ports:
-      - "8080:8080"  # Exposing the backend on port 8080
+      - "8000:8000"  # Exposing the backend on port 8080
     depends_on:
       - mysql-db
     networks:
       - app-network
 
   # React frontend service (First frontend)
-  react-frontend-a:
-    image: keeleybootcamp/lbg-car-react-front-a  # Replace with your actual image or build context
+  react-app:
+    image: keeleybootcamp/react-app  # Replace with your actual image or build context
     build:
-      context: ./react-frontend-1  # Path to the first React app
+      context: ./  # Path to the first React app
     ports:
-      - "3000:80"  # Exposing React frontend on port 3000 (or adjust as needed)
+      - "80:80"  # Exposing React frontend on port 3000 (or adjust as needed)
     networks:
       - app-network
 
-  # React frontend service (Second frontend)
-  react-frontend-b:
-    image: keeleybootcamp/lbg-car-react-front-b  # Replace with your actual image or build context
-    build:
-      context: ./react-frontend-2  # Path to the second React app
-    ports:
-      - "3001:80"  # Exposing second React frontend on port 3001
-    networks:
-      - app-network
 
   # MySQL database service
   mysql-db:
