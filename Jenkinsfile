@@ -28,7 +28,7 @@ pipeline {
         stage('Install React Dependencies') {
             steps {
                 dir("${REACT_DIR}") {
-                    sh "yarn install"
+                    sh "npm install"
                 }
             }
         }
@@ -37,7 +37,7 @@ pipeline {
         stage('Test React') {
             steps {
                 dir("${REACT_DIR}") {
-                    sh "yarn test"
+                    sh "npm test"
                 }
             }
         }
@@ -46,7 +46,7 @@ pipeline {
         stage('Package React') {
             steps {
                 dir("${REACT_DIR}") {
-                    sh "yarn build"
+                    sh "npm run build"
                 }
             }
         }
